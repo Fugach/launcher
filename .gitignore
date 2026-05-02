@@ -1,0 +1,4 @@
+bin/
+mc_main/
+instances/
+.venv/

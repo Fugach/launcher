@@ -1,0 +1,6 @@
+pyside6
+pyside6-addons
+pyside6-essentials
+shiboken6
+pip
+wget

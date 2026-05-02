@@ -33,9 +33,16 @@ def install():
     if not os.path.isdir("instances"):
         os.makedirs("instances")
 def get_versions(channel):
-    output = list(portablemc("search --channel " + channel + " --output machine").stdout.split())
-    output = [item for item in output if not any(x in item for x in ["+00:00", "name", "channel", "release_date", "row", "sep", channel])]
+    # snapshot, alpha, beta, release...
+    if channel != "":
+        output = list(portablemc("search --channel " + channel + " --output machine").stdout.split())
+    else:
+        channel = " "
+        output = list(portablemc("search --output machine").stdout.split()) # каждая версия включая тег
+    output = [item for item in output if not any(x in item for x in \
+    ["+00:00", "name", "channel", "release_date", "row", "sep", channel])]
     return output
+
 if __name__ == "__main__":
     install()
-    get_versions("alpha")
+    print(get_versions())
