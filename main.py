@@ -1,4 +1,4 @@
-import os, subprocess, wget, zipfile, json
+import os, subprocess, wget, zipfile, json, shutil
 
 def portablemc(command: str):
     args = command.split()
@@ -100,3 +100,35 @@ if __name__ == "__main__":
                     "modloader" : modloader
                 }, file, ensure_ascii=False, indent=2)
             print(f"Готово! Папка находится по пути {install_dir}.")
+        elif x == "3":
+            all_instances_dirs = []
+            all_instances_names = []
+            for directory in os.listdir("instances"):
+                if os.path.exists(f"instances/{directory}/pack-info.json"):
+                    with open(f"instances/{directory}/pack-info.json", "r", encoding="utf-8") as file:
+                        instance_info : dict = json.load(file)
+                        all_instances_dirs.append(directory)
+                        all_instances_names.append(instance_info["name"])
+            if len(all_instances_dirs) == 0:
+                print("Нет сборок!")
+                pass
+            print("НАЗВАНИЕ | ДИРЕКТОРИЯ")
+            for i in range(len(all_instances_dirs)):
+                print(all_instances_names[i], "|", all_instances_dirs[i] + "/")
+            print("Введите название папки...\n> ", end="")
+
+            instance_dir = input()
+
+            if os.path.exists(f"instances/{instance_dir}"):
+                if input("Вы точно хотите удалить сборку? Введите 'Yes' без кавычек для подтверждения\n> ") == "Yes":
+                    if input("Вы ТОЧНО хотите этого? Введите 'DELETE' без кавычек для подтверждения\n> ") == "DELETE":
+                        if input("Последнее предупреждение! Введите 'Sure' без кавычек.\nВСЯ папка сборки будет УНИЧТОЖЕНА БЕЗВОЗРАТНО!\n> ") == "Sure":
+                            shutil.rmtree(f"instances/{instance_dir}")
+                            if not os.path.exists(f"instances/{instance_dir}"):
+                                print("Сборка успешно удалена")
+                        else:
+                            print("ОТМЕНЕНО")
+                    else:
+                        print("ОТМЕНЕНО")
+                else:
+                    print("ОТМЕНЕНО")
