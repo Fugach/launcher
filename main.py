@@ -1,20 +1,18 @@
-from PySide6.QtGui import QGuiApplication
-from PySide6.QtQml import QQmlApplicationEngine
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QApplication, QLabel
 import os, subprocess, wget, zipfile, json
 
 def portablemc(command: str):
     args = command.split()
-    process = subprocess.run(
-        [os.path.join("bin", "portablemc.exe"), *args], capture_output=True)
-    try:
-        stdout = process.stdout.decode("utf-8")
-        stderr = process.stderr.decode("utf-8")
-    except UnicodeDecodeError:
-        stdout = process.stdout.decode("cp1251", errors="replace")
-        stderr = process.stderr.decode("cp1251", errors="replace")
-    return process.returncode, stdout, stderr
+    process = subprocess.Popen( # Popen даёт динамический вывод данных, а не после завершения
+        [os.path.join("bin", "portablemc.exe"), *args],
+        stdout=subprocess.PIPE, # "труба" с данными
+        stderr=subprocess.STDOUT, # чё бы и нет
+        bufsize=1, # какой-то буфер ввода/вывода. Согласно документации, значение 1 заставляет выводить данные буфера построчно.
+        text=True)
+
+    for string in process.stdout:
+        print(string, end="")
+    process.stdout.close()
+    return process.wait()
 def install():
     if not os.path.exists("bin/portablemc.exe"):
         print("Downloading portablemc...")
@@ -56,16 +54,29 @@ if __name__ == "__main__":
     while True:
         x = input("> ")
         if x == "1":
-            all_instances = os.listdir("instances")
+            all_instances_dirs = []
+            all_instances_names = []
+            for directory in os.listdir("instances"):
+                if os.path.exists(f"instances/{directory}/pack-info.json"):
+                    with open(f"instances/{directory}/pack-info.json", "r", encoding="utf-8") as file:
+                        instance_info : dict = json.load(file)
+                        all_instances_dirs.append(directory)
+                        all_instances_names.append(instance_info["name"])
+            if len(all_instances_dirs) == 0:
+                print("Нет сборок!")
+                pass
+            print("НАЗВАНИЕ | ДИРЕКТОРИЯ")
+            for i in range(len(all_instances_dirs)):
+                print(all_instances_names[i], "|", all_instances_dirs[i] + "/")
+            print("Введите название папки...\n> ", end="")
 
-            num = 1
-            for y in all_instances:
-                print(str(num) + ".", y)
-                num += 1
+            instance_dir = input()
+            with open(f"instances/{instance_dir}/pack-info.json", "r", encoding="utf-8") as file:
+                info : directory = json.load(file)
+                instance_version = info["version"]
+                instance_modloader = info["modloader"]
 
-            print("Выберите сборку...\n> ", end="")
-            portablemc(f"--main-dir %~dp0/../../mc_main start -u {nickname} --bin-dir bin --mc-dir %~dp0/../../instances/{str(all_instances[int(input()) - 1])} mojang:b1.7.3")
-            exit(0)
+            portablemc(f"--main-dir %~dp0/../mc_main start -u {nickname} --bin-dir bin --mc-dir %~dp0/../instances/{instance_dir} {instance_modloader}:{instance_version}")
         elif x == "2":
             name = input("Введите название...\n> ")
             version = input("Выберите версию...\n> ")
