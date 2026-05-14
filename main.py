@@ -1,56 +1,13 @@
-import os, subprocess, wget, zipfile, json, shutil
-
-def portablemc(command: str):
-    args = command.split()
-    process = subprocess.Popen( # Popen даёт динамический вывод данных, а не после завершения
-        [os.path.join("bin", "portablemc.exe"), *args],
-        stdout=subprocess.PIPE, # "труба" с данными
-        stderr=subprocess.STDOUT, # чё бы и нет
-        bufsize=1, # какой-то буфер ввода/вывода. Согласно документации, значение 1 заставляет выводить данные буфера построчно.
-        text=True)
-
-    for string in process.stdout:
-        print(string, end="")
-    process.stdout.close()
-    return process.wait()
-def install():
-    if not os.path.exists("bin/portablemc.exe"):
-        print("Downloading portablemc...")
-        wget.download(
-            "https://github.com/theorzr/portablemc/releases/download/v5.0.3/portablemc-5.0.3-windows-x86_64-msvc.zip",\
-            "portablemc-5.0.3-windows-x86_64-msvc.zip")
-        print("\nDone. Unzipping...")
-        with zipfile.ZipFile("portablemc-5.0.3-windows-x86_64-msvc.zip") as zip:
-            zip.extract("portablemc.exe")
-        os.remove("portablemc-5.0.3-windows-x86_64-msvc.zip")
-        if not os.path.isdir("bin"):
-            os.makedirs("bin")
-        os.replace("portablemc.exe", "bin/portablemc.exe")
-        print("Now portablemc is here!")
-    else:
-        print("portablemc is already here!")
-    if not os.path.isdir("mc_main"):
-        os.makedirs("mc_main")
-    if not os.path.isdir("instances"):
-        os.makedirs("instances")
-def get_versions(channel):
-    # snapshot, alpha, beta, release...
-    all_blacklist = ["+00:00", "name", "channel", "release_date", "row", "sep"]
-    if channel != "":
-        output = list(portablemc("search --channel " + channel + " --output machine").stdout.split())
-    else:
-        for x in ["release", "release*", "snapshot", "beta", "alpha"]:
-            all_blacklist.append(x)
-        output = list(portablemc("search --output machine").stdout.split()) # каждая версия включая тег
-    output = [item for item in output if not any(x in item for x in all_blacklist)]
-    return output
+from scripts import portablemc
+# import scripts.first_start
+import os, json, send2trash
 
 nickname : str = "123"
 
 if __name__ == "__main__":
-    install()
+    scripts.first_start.start()
     print("!!! пока что интерфейс только текстовый !!!")
-    print("Что сделать?\n1. Запустить сборку\n2. Создать сборку\n3. Удалить сборку\n Введите номер... ")
+    print("--------------------------------------------\nЧто сделать?\n1. Запустить сборку\n2. Создать сборку\n3. Удалить сборку\n Введите номер... ")
     while True:
         x = input("> ")
         if x == "1":
@@ -72,11 +29,11 @@ if __name__ == "__main__":
 
             instance_dir = input()
             with open(f"instances/{instance_dir}/pack-info.json", "r", encoding="utf-8") as file:
-                info : directory = json.load(file)
+                info : dict = json.load(file)
                 instance_version = info["version"]
                 instance_modloader = info["modloader"]
 
-            portablemc(f"--main-dir %~dp0/../mc_main start -u {nickname} --bin-dir bin --mc-dir %~dp0/../instances/{instance_dir} {instance_modloader}:{instance_version}")
+            portablemc(f"--main-dir %~dp0/../mc_main start -u {nickname} --bin-dir bin --mc-dir %~dp0/../instances/{instance_dir} {instance_modloader}:{instance_version}", False)
         elif x == "2":
             name = input("Введите название...\n> ")
             version = input("Выберите версию...\n> ")
@@ -121,13 +78,12 @@ if __name__ == "__main__":
 
             if os.path.exists(f"instances/{instance_dir}"):
                 if input("Вы точно хотите удалить сборку? Введите 'Yes' без кавычек для подтверждения\n> ") == "Yes":
-                    if input("Вы ТОЧНО хотите этого? Введите 'DELETE' без кавычек для подтверждения\n> ") == "DELETE":
-                        if input("Последнее предупреждение! Введите 'Sure' без кавычек.\nВСЯ папка сборки будет УНИЧТОЖЕНА БЕЗВОЗРАТНО!\n> ") == "Sure":
-                            shutil.rmtree(f"instances/{instance_dir}")
-                            if not os.path.exists(f"instances/{instance_dir}"):
-                                print("Сборка успешно удалена")
+                    if input("Папка сборки будет перемещена в корзину! Введите 'DELETE' без кавычек для подтверждения\n> ") == "DELETE":
+                        send2trash.send2trash(f"instances/{instance_dir}")
+                        if not os.path.exists(f"instances/{instance_dir}"):
+                            print("Сборка успешно удалена")
                         else:
-                            print("ОТМЕНЕНО")
+                            print("что-то пошло не так")
                     else:
                         print("ОТМЕНЕНО")
                 else:

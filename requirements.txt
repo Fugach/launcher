@@ -1,3 +1,4 @@
 pip
 wget
-customtkinter
+pillow
+pyside6
