@@ -1,14 +1,16 @@
-from scripts import portablemc
-# import scripts.first_start
-import os, json, send2trash
+import os
+
+import assets.scripts.first_start
 
 nickname : str = "123"
 
 if __name__ == "__main__":
-    scripts.first_start.start()
-    print("!!! пока что интерфейс только текстовый !!!")
-    print("--------------------------------------------\nЧто сделать?\n1. Запустить сборку\n2. Создать сборку\n3. Удалить сборку\n Введите номер... ")
-    while True:
+    # if not os.path.exists("bin/portablemc.exe"):
+    assets.scripts.first_start.start()
+    # pass
+    # print("!!! пока что интерфейс только текстовый !!!")
+    # print("--------------------------------------------\nЧто сделать?\n1. Запустить сборку\n2. Создать сборку\n3. Удалить сборку\n Введите номер... ")
+    while False:
         x = input("> ")
         if x == "1":
             all_instances_dirs = []
