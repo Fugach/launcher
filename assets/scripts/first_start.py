@@ -57,7 +57,7 @@ class MainWindow(QMainWindow):
     def download_pmc(self):
         self.button.setDisabled(True)
         if not os.path.exists("bin/portablemc.exe"):
-            dlg = PMC_dialog()
+            dlg = PMC_dialog(self)
             if dlg.exec():
                 self.button.setText("Скачиваем portablemc...")
                 self.button.setDisabled(True)
@@ -92,8 +92,8 @@ class MainWindow(QMainWindow):
 
 
 class PMC_dialog(QDialog):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent)
 
         self.setWindowTitle("Уведомление")
         buttons = (
