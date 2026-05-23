@@ -12,9 +12,28 @@ class MainWindow(QMainWindow):
         self.setFixedSize(QSize(600, 480))
 
         self.stacked_layout = QStackedLayout()
-        layout_pmc = QVBoxLayout()
-        layout_pmc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout_acc = QVBoxLayout()
+
+
+        first_page = PMG_page(self.stacked_layout)
+
+        page_acc = QWidget()
+
+        for widget in [first_page, page_acc]:
+            self.stacked_layout.addWidget(widget)
+        self.stacked_layout.setCurrentIndex(0)
+
+        widget = QWidget()
+        widget.setLayout(self.stacked_layout)
+        self.setCentralWidget(widget)
+
+class PMG_page(QWidget):
+    def __init__(self, stacked_layout):
+        super().__init__()
+        self.main_layout = stacked_layout # нужно для изменения индекса страницы из ЭТОГО класса напрямую
+        # main_layout точно такой же, как и stacked_layout из класса MainWindow
+        layout = QVBoxLayout()
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         title = QLabel("Приветствую вас в NAME!")
         title_font = title.font()
@@ -24,7 +43,7 @@ class MainWindow(QMainWindow):
             Qt.AlignmentFlag.AlignTop
             | Qt.AlignmentFlag.AlignHCenter
         )
-        layout_pmc.addWidget(title)
+        layout.addWidget(title)
         main_text = QLabel("Прежде чем начать работу, нужно настроить лаунчер под вас.")
         main_text_font = main_text.font()
         main_text_font.setPointSize(16)
@@ -34,26 +53,13 @@ class MainWindow(QMainWindow):
             Qt.AlignmentFlag.AlignTop
             | Qt.AlignmentFlag.AlignHCenter
         )
-        layout_pmc.addWidget(main_text)
+        layout.addWidget(main_text)
         self.button = QPushButton("Погнали")
         self.button.clicked.connect(self.download_pmc)
         self.button.pressed.connect(lambda : self.button.setText("и..."))
         self.button.setFixedSize(QSize(200, 80))
-        layout_pmc.addWidget(self.button, alignment=Qt.AlignmentFlag.AlignCenter)
-
-
-        page_pmc = QWidget()
-        page_pmc.setLayout(layout_pmc)
-
-        page_acc = QWidget()
-        page_acc.setLayout(layout_acc)
-
-        for widget in [page_pmc, page_acc]:
-            self.stacked_layout.addWidget(widget)
-        self.stacked_layout.setCurrentIndex(0)
-        widget = QWidget()
-        widget.setLayout(self.stacked_layout)
-        self.setCentralWidget(widget)
+        layout.addWidget(self.button, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.setLayout(layout)
     def download_pmc(self):
         self.button.setDisabled(True)
         if not os.path.exists("bin/portablemc.exe"):
@@ -65,7 +71,7 @@ class MainWindow(QMainWindow):
                 install()
             else:
                 self.button.clicked.disconnect(self.download_pmc)
-                self.button.clicked.connect(lambda: self.stacked_layout.setCurrentIndex(1))
+                self.button.clicked.connect(lambda: self.main_layout.setCurrentIndex(1))
                 QApplication.processEvents()
                 self.button.setText("Дальше")
                 self.button.setDisabled(False)
@@ -75,13 +81,13 @@ class MainWindow(QMainWindow):
             self.button.clicked.disconnect(self.download_pmc)
             QApplication.processEvents()
             time.sleep(1)
-            self.stacked_layout.setCurrentIndex(1)
+            self.main_layout.setCurrentIndex(1)
             return None
         if os.path.exists("bin/portablemc.exe"):
             self.button.setDisabled(True)
             self.button.setText("Готово!")
             self.button.clicked.disconnect(self.download_pmc)
-            self.button.clicked.connect(lambda : self.stacked_layout.setCurrentIndex(1))
+            self.button.clicked.connect(lambda : self.main_layout.setCurrentIndex(1))
             QApplication.processEvents()
             time.sleep(1)
             self.button.setText("Дальше")
@@ -89,7 +95,6 @@ class MainWindow(QMainWindow):
         else:
             self.button.setText("Что-то навернулось... Может стоит попробовать ещё раз?")
             self.button.setDisabled(False)
-
 
 class PMC_dialog(QDialog):
     def __init__(self, parent=None):
