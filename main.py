@@ -2,8 +2,6 @@ import os
 
 import assets.scripts.first_start
 
-nickname : str = "123"
-
 if __name__ == "__main__":
     # if not os.path.exists("bin/portablemc.exe"):
     assets.scripts.first_start.start()

@@ -3,3 +3,4 @@ wget
 pillow
 pyside6
 send2trash
+skinpy
