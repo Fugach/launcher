@@ -1,10 +1,14 @@
 from .portablemc import install
-import sys, os.path, time, subprocess
+from ..classes.PixelQWidgets import PixelQPushButton
+import sys, os.path, time, subprocess, darkdetect
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
 
-basedir = os.path.dirname(__file__)
+if getattr(sys, 'frozen', False):
+    basedir = os.path.dirname(sys.executable)  # .exe
+else:
+    basedir = os.path.dirname(os.path.abspath(__file__))  # .py
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -27,6 +31,9 @@ class MainWindow(QMainWindow):
         widget = QWidget()
         widget.setLayout(self.stacked_layout)
         self.setCentralWidget(widget)
+    def update_theme(self):
+        os_theme = darkdetect.theme()
+
 
 class PMG_page(QWidget):
     def __init__(self, stacked_layout):
@@ -56,13 +63,16 @@ class PMG_page(QWidget):
         )
         layout.addWidget(main_text)
 
-        self.button = QPushButton("Погнали")
+        self.button = (
+            QPushButton("Погнали"))
+        self.button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         button_font = self.button.font()
         button_font.setPointSize(16)
         self.button.setFont(button_font)
         self.button.clicked.connect(self.download_pmc)
         self.button.pressed.connect(lambda : self.button.setText("и..."))
-        self.button.setFixedSize(QSize(200, 80))
+        self.button.setFixedSize(90, 60)
+        self.button.updateGeometry()
         layout.addWidget(self.button, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.setLayout(layout)
@@ -102,7 +112,7 @@ class ACC_page(QWidget):
 
         lic_acc = QPushButton("С лицензией")
         lic_acc.setIcon(QIcon(os.path.join(basedir, "../textures/microsoft_logo.png")))
-        lic_acc.setIconSize(QSize(64, 64))
+        lic_acc.setIconSize(QSize(30, 30))
         lic_acc.clicked.connect(self.get_licence, self.stacked_layout)
         lic_acc_font = lic_acc.font()
         lic_acc_font.setPointSize(16)
@@ -111,7 +121,7 @@ class ACC_page(QWidget):
 
         offline_acc = QPushButton("Без лицензии")
         offline_acc.setIcon(QIcon(os.path.join(basedir, "../textures/offline_logo_light.png")))
-        offline_acc.setIconSize(QSize(64, 64))
+        offline_acc.setIconSize(QSize(30, 30))
         offline_acc_font = offline_acc.font()
         offline_acc_font.setPointSize(16)
         offline_acc.setFont(offline_acc_font)
@@ -133,18 +143,19 @@ class ACC_page(QWidget):
                 break
             if self.nickname == "":
                 error = QMessageBox.critical(self, "Ошибка", "Никнейм не может быть пустым!", buttons=QMessageBox.StandardButton.Ok)
-        print("Player nickname:", self.nickname)
-        self.button_next = QPushButton(f"Продолжить с никнеймом\n{self.nickname}")
-        button_next_font = self.button_next.font()
-        button_next_font.setPointSize(12)
-        self.button_next.setFont(button_next_font)
-        self.layout.addWidget(self.button_next)
+        if self.nickname != "":
+            print("Player nickname:", self.nickname)
+            self.button_next = QPushButton(f"Продолжить с никнеймом\n{self.nickname}")
+            button_next_font = self.button_next.font()
+            button_next_font.setPointSize(12)
+            self.button_next.setFont(button_next_font)
+            self.layout.addWidget(self.button_next)
     def get_licence(self):
         if self.button_next:
             self.button_next.deleteLater()
             self.layout.removeWidget(self.button_next)
         login = subprocess.Popen(
-            [os.path.join(basedir, "../../bin", "portablemc.exe"), "auth", "login", "--output", "machine"],
+            [os.path.join(basedir, "../../bin", "portablemc.exe"), "--main-dir", "%~dp0", "auth", "login", "--output", "machine"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -196,8 +207,9 @@ class ACC_page(QWidget):
         self.stacked_layout.setCurrentIndex(2)
 
 class SUCCESS_page(QWidget):
-    def __init__(self):
-        super.__init__()
+    def __init__(self, stacked_layout):
+        super().__init__()
+        self.stacked_layout = stacked_layout
 
 def start():
     print("Current working folder:", os.getcwd())
@@ -205,9 +217,9 @@ def start():
 
     app = QApplication(sys.argv)
 
+    app.setStyle("Fusion")
+
     window = MainWindow()
     window.show()
     # запуск цикла в app
     app.exec()
-
-
