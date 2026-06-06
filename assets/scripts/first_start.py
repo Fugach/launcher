@@ -31,9 +31,6 @@ class MainWindow(QMainWindow):
         widget = QWidget()
         widget.setLayout(self.stacked_layout)
         self.setCentralWidget(widget)
-    def update_theme(self):
-        os_theme = darkdetect.theme()
-
 
 class PMG_page(QWidget):
     def __init__(self, stacked_layout):
@@ -42,7 +39,7 @@ class PMG_page(QWidget):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        title = QLabel("Приветствую вас в NAME!")
+        title = QLabel("Приветствую вас в DumbMC!")
         title_font = title.font()
         title_font.setPointSize(32)
         title.setFont(title_font)
