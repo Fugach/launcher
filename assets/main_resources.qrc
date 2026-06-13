@@ -1,0 +1,14 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>account_dark.png</file>
+    <file>account_light.png</file>
+    <file>all_instances.png</file>
+    <file>create_instance_dark.png</file>
+    <file>create_instance_light.png</file>
+    <file>current_instance_dark.png</file>
+    <file>current_instance_light.png</file>
+    <file>logo.png</file>
+    <file>settings_dark.png</file>
+    <file>settings_light.png</file>
+  </qresource>
+</RCC>
