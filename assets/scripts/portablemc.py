@@ -29,11 +29,10 @@ def portablemc(command : str, echo : bool, show : bool) -> str: # стрелоч
 
 def install():
     if not os.path.exists("bin/portablemc.exe"):
-        print("Скачиваем portablemc...")
         wget.download(
             "https://github.com/theorzr/portablemc/releases/download/v5.0.3/portablemc-5.0.3-windows-x86_64-msvc.zip",\
             "portablemc-5.0.3-windows-x86_64-msvc.zip")
-        print("Готово. Распаковываем...")
+        print('Распаковка... ', end='')
         with zipfile.ZipFile("portablemc-5.0.3-windows-x86_64-msvc.zip") as zip:
             zip.extract("portablemc.exe")
         os.remove("portablemc-5.0.3-windows-x86_64-msvc.zip")
@@ -42,11 +41,7 @@ def install():
         os.replace("portablemc.exe", "bin/portablemc.exe")
         print("Теперь portablemc здесь!")
     else:
-        print("portablemc уже здесь! Установка не требуется!")
-    if not os.path.isdir("mc_main"):
-        os.makedirs("mc_main")
-    if not os.path.isdir("instances"):
-        os.makedirs("instances")
+        print("Установка не требуется!")
 
 def get_versions(channel):
     # snapshot, alpha, beta, release...

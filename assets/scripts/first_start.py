@@ -1,14 +1,35 @@
 from .portablemc import install
-from ..classes.PixelQWidgets import PixelQPushButton
-import sys, os.path, time, subprocess, darkdetect
+import sys, time, subprocess, darkdetect, json
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
+from pathlib import Path
 
-if getattr(sys, 'frozen', False):
-    basedir = os.path.dirname(sys.executable)  # .exe
-else:
-    basedir = os.path.dirname(os.path.abspath(__file__))  # .py
+basedir = ''
+PORTABLEMC_DIR = Path(__file__).parent.parent / 'bin' / 'portablemc.exe'
+ROOT_DIR = Path(__file__).parent.parent
+TEXTURES_DIR = Path(__file__).parent / 'textures'
+PROFILES_DIR = Path(__file__).parent.parent / 'profiles.json'
+
+print('-' * 55)
+print('ROOT_DIR         |', ROOT_DIR)
+print('TEXTURES_DIR     |', TEXTURES_DIR)
+print('PORTABLEMC_DIR   |', PORTABLEMC_DIR)
+print('PROFILES_DIR     |', PROFILES_DIR)
+print('-' * 55)
+
+if not PROFILES_DIR.is_file():
+    with open(PROFILES_DIR, 'w', encoding='utf-8') as file:
+        json.dump({}, file)
+try:
+    with open(PROFILES_DIR, 'r', encoding='utf-8') as file:
+        PROFILES = json.load(file)
+except json.JSONDecodeError:
+    PROFILES_DIR.rename('BACKUP_profiles.json')
+    with open(PROFILES_DIR, 'w', encoding='utf-8') as file:
+        json.dump({}, file)
+        PROFILES = json.load(file)
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -17,12 +38,11 @@ class MainWindow(QMainWindow):
         self.setFixedSize(QSize(600, 480))
 
         self.stacked_layout = QStackedLayout()
-        layout_acc = QVBoxLayout()
 
 
         first_page = PMG_page(self.stacked_layout)
-        second_page = ACC_page(self.stacked_layout)
-        third_page = SUCCESS_page(self.stacked_layout)
+        second_page = account_page(self.stacked_layout)
+        third_page = success_page(self.stacked_layout)
 
         for widget in [first_page, second_page, third_page]:
             self.stacked_layout.addWidget(widget)
@@ -75,7 +95,7 @@ class PMG_page(QWidget):
         self.setLayout(layout)
     def download_pmc(self):
         self.button.setDisabled(True)
-        if not os.path.exists("bin/portablemc.exe"):
+        if not PORTABLEMC_DIR.is_file():
             self.button.setText("Скачиваем\nportablemc...")
             self.button.setDisabled(True)
             QApplication.processEvents()
@@ -88,7 +108,7 @@ class PMG_page(QWidget):
         self.button.setText("Дальше")
         self.button.setDisabled(False)
 
-class ACC_page(QWidget):
+class account_page(QWidget):
     def __init__(self, stacked_layout):
         super().__init__()
         self.stacked_layout = stacked_layout
@@ -108,7 +128,6 @@ class ACC_page(QWidget):
         options_layout = QHBoxLayout()
 
         lic_acc = QPushButton("С лицензией")
-        lic_acc.setIcon(QIcon(os.path.join(basedir, "../textures/microsoft_logo.png")))
         lic_acc.setIconSize(QSize(30, 30))
         lic_acc.clicked.connect(self.get_licence, self.stacked_layout)
         lic_acc_font = lic_acc.font()
@@ -117,7 +136,6 @@ class ACC_page(QWidget):
         options_layout.addWidget(lic_acc)
 
         offline_acc = QPushButton("Без лицензии")
-        offline_acc.setIcon(QIcon(os.path.join(basedir, "../textures/offline_logo_light.png")))
         offline_acc.setIconSize(QSize(30, 30))
         offline_acc_font = offline_acc.font()
         offline_acc_font.setPointSize(16)
@@ -128,22 +146,40 @@ class ACC_page(QWidget):
         options.setLayout(options_layout)
         self.layout.addWidget(options)
         self.setLayout(self.layout)
+
     def get_nickname(self):
-        self.nickname = ""
         title = "Никнейм"
         label = "Введи свой никнейм..."
-        while self.nickname == "":
+        self.nickname = ''
+        while self.nickname == '':
             self.nickname, ok = QInputDialog.getText(
                 self, title, label
             )
+            wrong_symbols = []
+            for symbol in self.nickname:
+                if symbol not in "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm0123456789_":
+                    wrong_symbols.append(symbol)
             if not ok:
                 break
             if self.nickname == "":
-                error = QMessageBox.critical(self, "Ошибка", "Никнейм не может быть пустым!", buttons=QMessageBox.StandardButton.Ok)
+                self.nickname = ''
+                error = QMessageBox.critical(self, 'Ошибка', 'Никнейм не может быть пустым!', buttons=QMessageBox.StandardButton.Ok)
+            if wrong_symbols != []:
+                self.nickname = ''
+                wrong_nickname = QMessageBox.critical(self, 'Ошибка',
+                                                      f'В никнейме есть недопустимые символы:\n"{", ".join(wrong_symbols)}"\n'
+                                                      f'Пожалуйста, учтите, что разрешены только:\n'
+                                                      f'1. Латинские буквы(A-Z, a-z)\n'
+                                                      f'2. Цифры (0-9)\n'
+                                                      f'3. Нижнее подчёркивание (_)', buttons=QMessageBox.StandardButton.Ok)
         if self.nickname != "":
+            for btn in self.findChildren(QPushButton):
+                if btn == self.button_next:
+                    btn.deleteLater()
             print("Player nickname:", self.nickname)
             self.button_next = QPushButton(f"Продолжить с никнеймом\n{self.nickname}")
             button_next_font = self.button_next.font()
+            self.button_next.clicked.connect(lambda : write_nickname())
             button_next_font.setPointSize(12)
             self.button_next.setFont(button_next_font)
             self.layout.addWidget(self.button_next)
@@ -152,7 +188,7 @@ class ACC_page(QWidget):
             self.button_next.deleteLater()
             self.layout.removeWidget(self.button_next)
         login = subprocess.Popen(
-            [os.path.join(basedir, "../../bin", "portablemc.exe"), "--main-dir", "%~dp0", "auth", "login", "--output", "machine"],
+            [PORTABLEMC_DIR, "--main-dir", "%~dp0", "auth", "login", "--output", "machine"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -197,20 +233,18 @@ class ACC_page(QWidget):
                 pass
                 QApplication.processEvents()
             else:
-                print("Login succesful!")
+                print("Login successful!")
                 break
         for widget in [info, link, info2, copyable_code]:
             widget.deleteLater()
         self.stacked_layout.setCurrentIndex(2)
 
-class SUCCESS_page(QWidget):
+class success_page(QWidget):
     def __init__(self, stacked_layout):
         super().__init__()
         self.stacked_layout = stacked_layout
 
 def start():
-    print("Current working folder:", os.getcwd())
-    print("Paths are relative to:", basedir)
 
     app = QApplication(sys.argv)
 
