@@ -9,7 +9,7 @@ basedir = ''
 PORTABLEMC_DIR = Path(__file__).parent.parent / 'bin' / 'portablemc.exe'
 ROOT_DIR = Path(__file__).parent.parent
 TEXTURES_DIR = Path(__file__).parent / 'textures'
-PROFILES_DIR = Path(__file__).parent.parent / 'profiles.json'
+PROFILES_DIR = Path(__file__).parent.parent.parent / 'profiles.txt'
 
 print('-' * 55)
 print('ROOT_DIR         |', ROOT_DIR)
@@ -20,15 +20,9 @@ print('-' * 55)
 
 if not PROFILES_DIR.is_file():
     with open(PROFILES_DIR, 'w', encoding='utf-8') as file:
-        json.dump({}, file)
-try:
-    with open(PROFILES_DIR, 'r', encoding='utf-8') as file:
-        PROFILES = json.load(file)
-except json.JSONDecodeError:
-    PROFILES_DIR.rename('BACKUP_profiles.json')
-    with open(PROFILES_DIR, 'w', encoding='utf-8') as file:
-        json.dump({}, file)
-        PROFILES = json.load(file)
+        pass
+with open(PROFILES_DIR, 'r', encoding='utf-8') as file:
+     PROFILES = file.read().splitlines()
 
 
 class MainWindow(QMainWindow):
@@ -148,6 +142,15 @@ class account_page(QWidget):
         self.setLayout(self.layout)
 
     def get_nickname(self):
+        def write_nickname():
+            with open(PROFILES_DIR, 'r', encoding='utf-8') as file:
+                profiles = file.read().splitlines()
+                if self.nickname not in profiles:
+                    profiles.append(self.nickname)
+                    with open(PROFILES_DIR, 'w', encoding='utf-8') as file:
+                        file.write('\n'.join(profiles))
+                    self.stacked_layout.setCurrentIndex(2)
+                # json.dump()
         title = "Никнейм"
         label = "Введи свой никнейм..."
         self.nickname = ''

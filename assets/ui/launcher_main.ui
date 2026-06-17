@@ -48,7 +48,7 @@
               </property>
               <property name="icon">
                <iconset resource="../main_resources.qrc">
-                <normaloff>:/icons/logo.png</normaloff>:/icons/logo.png</iconset>
+                <normaloff>:/icons/textures/icons/logo.png</normaloff>:/icons/textures/icons/logo.png</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -86,7 +86,7 @@
               </property>
               <property name="icon">
                <iconset resource="../main_resources.qrc">
-                <normaloff>:/icons/create_instance_dark.png</normaloff>:/icons/create_instance_dark.png</iconset>
+                <normaloff>:/icons/textures/icons/create_instance_dark.png</normaloff>:/icons/textures/icons/create_instance_dark.png</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -121,7 +121,7 @@
               </property>
               <property name="icon">
                <iconset resource="../main_resources.qrc">
-                <normaloff>:/icons/current_instance_dark.png</normaloff>:/icons/current_instance_dark.png</iconset>
+                <normaloff>:/icons/textures/icons/current_instance_dark.png</normaloff>:/icons/textures/icons/current_instance_dark.png</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -156,7 +156,7 @@
               </property>
               <property name="icon">
                <iconset resource="../main_resources.qrc">
-                <normaloff>:/icons/all_instances.png</normaloff>:/icons/all_instances.png</iconset>
+                <normaloff>:/icons/textures/icons/all_instances.png</normaloff>:/icons/textures/icons/all_instances.png</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -194,7 +194,7 @@
               </property>
               <property name="icon">
                <iconset resource="../main_resources.qrc">
-                <normaloff>:/icons/account_dark.png</normaloff>:/icons/account_dark.png</iconset>
+                <normaloff>:/icons/textures/icons/account_dark.png</normaloff>:/icons/textures/icons/account_dark.png</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -229,7 +229,7 @@
               </property>
               <property name="icon">
                <iconset resource="../main_resources.qrc">
-                <normaloff>:/icons/settings_dark.png</normaloff>:/icons/settings_dark.png</iconset>
+                <normaloff>:/icons/textures/icons/settings_dark.png</normaloff>:/icons/textures/icons/settings_dark.png</iconset>
               </property>
               <property name="iconSize">
                <size>
