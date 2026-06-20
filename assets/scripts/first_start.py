@@ -1,22 +1,33 @@
 from .portablemc import install
-import sys, time, subprocess, darkdetect, json
-from PySide6.QtCore import *
-from PySide6.QtWidgets import *
+import sys, subprocess
+from PySide6.QtCore import QSize
+from PySide6.QtWidgets import (
+    QPushButton,
+    QLabel,
+    QWidget,
+    QMainWindow,
+    QVBoxLayout,
+    QStackedLayout,
+    QSizePolicy,
+    QApplication,
+    QHBoxLayout,
+    QInputDialog,
+    QMessageBox,
+    QLineEdit
+)
 from PySide6.QtGui import *
 from pathlib import Path
 
-basedir = ''
 PORTABLEMC_DIR = Path(__file__).parent.parent / 'bin' / 'portablemc.exe'
-ROOT_DIR = Path(__file__).parent.parent
 TEXTURES_DIR = Path(__file__).parent / 'textures'
 PROFILES_DIR = Path(__file__).parent.parent.parent / 'profiles.txt'
 
-print('-' * 55)
-print('ROOT_DIR         |', ROOT_DIR)
-print('TEXTURES_DIR     |', TEXTURES_DIR)
-print('PORTABLEMC_DIR   |', PORTABLEMC_DIR)
-print('PROFILES_DIR     |', PROFILES_DIR)
-print('-' * 55)
+print('Начинаем первый запуск...')
+# print('-' * 55)
+# print('TEXTURES_DIR     |', TEXTURES_DIR)
+# print('PORTABLEMC_DIR   |', PORTABLEMC_DIR)
+# print('PROFILES_DIR     |', PROFILES_DIR)
+# print('-' * 55)
 
 if not PROFILES_DIR.is_file():
     with open(PROFILES_DIR, 'w', encoding='utf-8') as file:
@@ -179,7 +190,6 @@ class account_page(QWidget):
             for btn in self.findChildren(QPushButton):
                 if btn == self.button_next:
                     btn.deleteLater()
-            print("Player nickname:", self.nickname)
             self.button_next = QPushButton(f"Продолжить с никнеймом\n{self.nickname}")
             button_next_font = self.button_next.font()
             self.button_next.clicked.connect(lambda : write_nickname())
@@ -236,7 +246,7 @@ class account_page(QWidget):
                 pass
                 QApplication.processEvents()
             else:
-                print("Login successful!")
+                print("УРА!! Успешный логин!")
                 break
         for widget in [info, link, info2, copyable_code]:
             widget.deleteLater()

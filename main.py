@@ -1,11 +1,24 @@
-import os
-
 import assets.scripts.first_start
 
+from pathlib import Path
+from PySide6.QtUiTools import QUiLoader
+from PySide6.QtWidgets import QApplication
+
+PORTABLEMC_DIR = Path(__file__).parent / 'bin' / 'portablemc.exe'
+TEXTURES_DIR = Path(__file__).parent / 'assets' / 'textures'
+PROFILES_DIR = Path(__file__).parent / 'profiles.txt'
+
+print('-' * 55)
+print('TEXTURES_DIR     |', TEXTURES_DIR)
+print('PORTABLEMC_DIR   |', PORTABLEMC_DIR)
+print('PROFILES_DIR     |', PROFILES_DIR)
+print('-' * 55)
+
 if __name__ == "__main__":
-    # if not os.path.exists("bin/portablemc.exe"):
-    assets.scripts.first_start.start()
-    # pass
+    if not PORTABLEMC_DIR.is_file() or not PROFILES_DIR.is_file():
+        assets.scripts.first_start.start()
+
+    loader
     # print("!!! пока что интерфейс только текстовый !!!")
     # print("--------------------------------------------\nЧто сделать?\n1. Запустить сборку\n2. Создать сборку\n3. Удалить сборку\n Введите номер... ")
     while False:
